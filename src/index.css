@@ -1,0 +1,319 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+:root {
+  --bg-color: #0f172a;
+  --text-color: #f8fafc;
+  --grid-bg: #1e293b;
+  --cell-empty: #334155;
+  --cell-wall: #ef4444;
+  --cell-path: rgba(234, 179, 8, 0.4);
+  --cell-goal: #22c55e;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  overflow: hidden;
+}
+
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  max-width: 90vw;
+  max-height: 95vh;
+}
+
+header {
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.controls-panel {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.status {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.status.playing {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}
+
+.status.won {
+  background: rgba(34, 197, 94, 0.15);
+  color: #86efac;
+  animation: pulse 2s infinite;
+}
+
+.status.lost {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  animation: shake 0.5s;
+}
+
+.grid-container {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, 48px);
+  grid-template-rows: repeat(12, 48px);
+  gap: 6px;
+  background-color: var(--grid-bg);
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow: inset 0 2px 15px rgba(0, 0, 0, 0.6);
+  /* The formula uses 12px padding + row/col * (48px size + 6px gap) */
+  /* width: 12 + 12*48 + 11*6 + 12 = 666px */
+  /* height = 666px */
+}
+
+/* Floating Elements (Player & Path) */
+.floating-player {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.8rem;
+  background-color: #3b82f6;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+  transition: top 0.25s cubic-bezier(0.25, 1, 0.5, 1), left 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  z-index: 10;
+  pointer-events: none;
+  /* Let clicks pass through to empty cells */
+}
+
+.floating-path {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+  pointer-events: none;
+  transition: top 0.3s ease, left 0.3s ease;
+}
+
+.floating-path::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background-color: var(--cell-path);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
+  animation: pulsePath 1.5s infinite;
+}
+
+/* Base Cells */
+.cell {
+  width: 48px;
+  height: 48px;
+  background-color: var(--cell-empty);
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.8rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.05);
+}
+
+.cell:hover {
+  background-color: #475569;
+}
+
+.cell.wall {
+  background-color: var(--cell-wall);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: not-allowed;
+}
+
+.cell.wall:hover {
+  background-color: var(--cell-wall);
+}
+
+.cell.build-anim {
+  animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cell.goal {
+  background-color: rgba(34, 197, 94, 0.2);
+  border: 2px dashed var(--cell-goal);
+}
+
+@keyframes pulsePath {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+}
+
+.reset-btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.reset-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+
+.reset-btn:active {
+  transform: translateY(0);
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+  }
+
+  50% {
+    opacity: 0.8;
+    text-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+  }
+
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-4px);
+  }
+
+  50% {
+    transform: translateX(4px);
+  }
+
+  75% {
+    transform: translateX(-4px);
+  }
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Ensure responsiveness for smaller screens */
+@media (max-width: 600px) {
+  .grid-container {
+    grid-template-columns: repeat(12, 32px);
+    grid-template-rows: repeat(12, 32px);
+    gap: 4px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  .cell {
+    width: 32px;
+    height: 32px;
+    font-size: 1.2rem;
+    border-radius: 6px;
+  }
+
+  .floating-player {
+    width: 32px;
+    height: 32px;
+    font-size: 1.2rem;
+    border-radius: 6px;
+  }
+
+  .floating-path {
+    width: 32px;
+    height: 32px;
+  }
+
+  .floating-path::after {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Update floating element sizing on mobile to match 32px + 4px gap and 8px padding */
+  /* Wait, this is hard without React conditional logic. Let's simplify by maintaining aspect ratio using CSS variables if we want, or just stick to desktop size first. */
+  /* Since CSS calc relies on values in React styles, we should ideally set CSS variables on the container. */
+}
