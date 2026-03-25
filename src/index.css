@@ -10,6 +10,9 @@
   --cell-goal: #22c55e;
   --primary: #3b82f6;
   --primary-hover: #2563eb;
+  --cell-size: 48px;
+  --grid-gap: 6px;
+  --grid-padding: 12px;
 }
 
 * {
@@ -99,11 +102,12 @@ h1 {
 .grid-container {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(12, 48px);
-  grid-template-rows: repeat(12, 48px);
-  gap: 6px;
+  grid-template-columns: repeat(12, var(--cell-size));
+  grid-template-rows: repeat(12, var(--cell-size));
+  gap: var(--grid-gap);
   background-color: var(--grid-bg);
-  padding: 12px;
+  padding: var(--grid-padding);
+  touch-action: none;
   border-radius: 16px;
   box-shadow: inset 0 2px 15px rgba(0, 0, 0, 0.6);
   /* The formula uses 12px padding + row/col * (48px size + 6px gap) */
@@ -114,8 +118,8 @@ h1 {
 /* Floating Elements (Player & Path) */
 .floating-player {
   position: absolute;
-  width: 48px;
-  height: 48px;
+  width: var(--cell-size);
+  height: var(--cell-size);
   border-radius: 8px;
   display: flex;
   justify-content: center;
@@ -131,8 +135,8 @@ h1 {
 
 .floating-path {
   position: absolute;
-  width: 48px;
-  height: 48px;
+  width: var(--cell-size);
+  height: var(--cell-size);
   border-radius: 8px;
   display: flex;
   justify-content: center;
@@ -154,8 +158,8 @@ h1 {
 
 /* Base Cells */
 .cell {
-  width: 48px;
-  height: 48px;
+  width: var(--cell-size);
+  height: var(--cell-size);
   background-color: var(--cell-empty);
   border-radius: 8px;
   display: flex;
@@ -279,41 +283,91 @@ h1 {
   }
 }
 
+/* Mobile Controls */
+.mobile-controls {
+  display: none;
+  grid-template-columns: repeat(3, 50px);
+  grid-template-rows: repeat(2, 50px);
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.mobile-controls button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 12px;
+  font-size: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-controls button:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.btn-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.btn-down {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.btn-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
 /* Ensure responsiveness for smaller screens */
 @media (max-width: 600px) {
+  :root {
+    --cell-size: 26px;
+    --grid-gap: 3px;
+    --grid-padding: 8px;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+  }
+
+  .game-container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
   .grid-container {
-    grid-template-columns: repeat(12, 32px);
-    grid-template-rows: repeat(12, 32px);
-    gap: 4px;
-    padding: 8px;
     border-radius: 12px;
   }
 
-  .cell {
-    width: 32px;
-    height: 32px;
-    font-size: 1.2rem;
-    border-radius: 6px;
-  }
-
+  .cell,
   .floating-player {
-    width: 32px;
-    height: 32px;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     border-radius: 6px;
-  }
-
-  .floating-path {
-    width: 32px;
-    height: 32px;
   }
 
   .floating-path::after {
-    width: 14px;
-    height: 14px;
+    width: 10px;
+    height: 10px;
   }
 
-  /* Update floating element sizing on mobile to match 32px + 4px gap and 8px padding */
-  /* Wait, this is hard without React conditional logic. Let's simplify by maintaining aspect ratio using CSS variables if we want, or just stick to desktop size first. */
-  /* Since CSS calc relies on values in React styles, we should ideally set CSS variables on the container. */
+  .mobile-controls {
+    display: grid;
+  }
+
+  .controls-panel {
+    display: none;
+  }
 }

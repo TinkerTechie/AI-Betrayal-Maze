@@ -86,6 +86,31 @@ function App() {
     setAiPath([]);
   };
 
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
+  };
+
+  const onTouchMove = (e) => setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
+
+  const onTouchEndHandler = () => {
+    if (!touchStart || !touchEnd) return;
+    const distanceX = touchStart.x - touchEnd.x;
+    const distanceY = touchStart.y - touchEnd.y;
+    const minSwipeDistance = 30;
+
+    if (Math.abs(distanceX) > Math.abs(distanceY)) {
+      if (distanceX > minSwipeDistance) movePlayer('LEFT');
+      if (distanceX < -minSwipeDistance) movePlayer('RIGHT');
+    } else {
+      if (distanceY > minSwipeDistance) movePlayer('UP');
+      if (distanceY < -minSwipeDistance) movePlayer('DOWN');
+    }
+  };
+
   return (
     <div className="game-container">
       <header>
@@ -98,13 +123,18 @@ function App() {
         </div>
       </header>
 
-      <div className="grid-container">
+      <div
+        className="grid-container"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEndHandler}
+      >
         {/* Floating Player Object for butter-smooth movement! */}
         <div
           className="floating-player"
           style={{
-            top: `${12 + playerPos.r * (48 + 6)}px`,
-            left: `${12 + playerPos.c * (48 + 6)}px`
+            top: `calc(var(--grid-padding) + ${playerPos.r} * (var(--cell-size) + var(--grid-gap)))`,
+            left: `calc(var(--grid-padding) + ${playerPos.c} * (var(--cell-size) + var(--grid-gap)))`
           }}
         >
           {status === 'LOST' ? '💀' : '😎'}
@@ -116,8 +146,8 @@ function App() {
           return (
             <div key={`path-${p.r}-${p.c}`} className="floating-path"
               style={{
-                top: `${12 + p.r * (48 + 6)}px`,
-                left: `${12 + p.c * (48 + 6)}px`
+                top: `calc(var(--grid-padding) + ${p.r} * (var(--cell-size) + var(--grid-gap)))`,
+                left: `calc(var(--grid-padding) + ${p.c} * (var(--cell-size) + var(--grid-gap)))`
               }}
             />
           );
@@ -152,7 +182,14 @@ function App() {
       </div>
 
       <div className="controls-panel">
-        <p>Use W, A, S, D, Arrow Keys or click adjacent cells</p>
+        <p>Use W, A, S, D, Arrow Keys, swipe, or use touch controls below</p>
+      </div>
+
+      <div className="mobile-controls">
+        <button className="btn-up" onClick={() => movePlayer('UP')}>⬆️</button>
+        <button className="btn-left" onClick={() => movePlayer('LEFT')}>⬅️</button>
+        <button className="btn-down" onClick={() => movePlayer('DOWN')}>⬇️</button>
+        <button className="btn-right" onClick={() => movePlayer('RIGHT')}>➡️</button>
       </div>
 
       <button onClick={resetGame} className="reset-btn">Restart Journey</button>
